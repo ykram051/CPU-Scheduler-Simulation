@@ -1,6 +1,8 @@
 from SchedulingAlgorithms.Scheduler import Scheduler
 import metrics
 from collections import deque
+from SchedulingAlgorithms.Scheduler import Scheduler
+import metrics
 
 class PriorityRRScheduler(Scheduler):
     def __init__(self, processes, time_quantum=2):

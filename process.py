@@ -12,6 +12,7 @@ class Process:
         waiting_time (int): Total time spent by the process waiting in the ready queue
         turnaround_time (int): Total time taken from arrival to completion
         response_time (int): Time at which the process first gets the CPU
+        start_time (int): Time at which the process starts execution
         started (bool): Flag indicating whether the process has started execution
         start_time (int): Time at which the process first gets the CPU
     """
@@ -30,6 +31,7 @@ class Process:
         self.turnaround_time = 0
         self.response_time = None  # Time when process first gets CPU
         self.start_time = None  # Time when process first gets CPU (used by schedulers)
+        self.start_time = None    # Time when process starts execution
         self.started = False
     
     def __str__(self):
