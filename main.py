@@ -63,7 +63,7 @@ def generate_processes(args):
     
     if args.random:
         # Generate random processes
-        processes = input_handler.generate_random_processes(
+        processes = InputHandler.generate_random_processes(
             args.random,
             arrival_min=args.arrival_min, 
             arrival_max=args.arrival_max,
@@ -76,16 +76,16 @@ def generate_processes(args):
         
     elif args.file:
         # Load processes from file
-        processes = input_handler.read_processes_from_file(args.file)
+        processes = InputHandler.read_processes_from_file(args.file)
         print(f"Loaded {len(processes)} processes from {args.file}")
     else:
         # Default to 5 random processes if no input method specified
-        processes = input_handler.generate_random_processes(5)
+        processes = InputHandler.generate_random_processes(5)
         print(f"Generated {len(processes)} default random processes")
     
     # Save processes to file if requested
     if args.save_input:
-        input_handler.save_processes_to_file(processes, args.save_input)
+        InputHandler.save_processes_to_file(processes, args.save_input)
     
     return processes
 

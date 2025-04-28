@@ -1,5 +1,5 @@
 from collections import deque
-from . import Scheduler
+from SchedulingAlgorithms.Scheduler import Scheduler
 import metrics
 
 class PriorityRRScheduler(Scheduler):
