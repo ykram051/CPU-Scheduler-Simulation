@@ -1,6 +1,6 @@
-from collections import deque
-from . import Scheduler
+from SchedulingAlgorithms.Scheduler import Scheduler
 import metrics
+from collections import deque
 
 class RoundRobinScheduler(Scheduler):
     def __init__(self, processes, time_quantum=2):

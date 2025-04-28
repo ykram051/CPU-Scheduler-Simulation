@@ -122,10 +122,16 @@ def calculate_priority_metrics(completed_processes, execution_sequence):
         low_pri_wait = waiting_time_by_priority[max_priority]
         high_pri_wait = waiting_time_by_priority[min_priority]
         
-        if low_pri_wait > 0:
+        # Fix the division by zero error by checking if high_pri_wait is zero
+        if high_pri_wait > 0:
             metrics['priority_preference_ratio'] = low_pri_wait / high_pri_wait
-        else:
+        elif low_pri_wait > 0:
+            # If high priority wait time is 0 but low priority wait time is positive,
+            # the preference ratio is theoretically infinite
             metrics['priority_preference_ratio'] = float('inf')
+        else:
+            # If both are 0, set to 1.0 (neutral preference)
+            metrics['priority_preference_ratio'] = 1.0
     else:
         metrics['priority_preference_ratio'] = 1.0
     

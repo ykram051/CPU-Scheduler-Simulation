@@ -1,4 +1,4 @@
-from . import Scheduler
+from SchedulingAlgorithms.Scheduler import Scheduler
 import metrics
 
 class PriorityScheduler(Scheduler):
