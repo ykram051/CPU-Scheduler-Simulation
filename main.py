@@ -1,7 +1,7 @@
 import os
 import argparse
 from process import Process
-import input_handler
+import InputHandler
 import metrics
 import visualization
 from SchedulingAlgorithms.FirstComeFirstServe import FCFSScheduler
