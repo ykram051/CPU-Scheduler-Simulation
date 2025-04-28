@@ -1,4 +1,4 @@
-from . import Scheduler
+from .Scheduler import Scheduler
 import metrics
 
 class SJFScheduler(Scheduler):
