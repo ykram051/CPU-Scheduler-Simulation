@@ -24,7 +24,7 @@ def generate_random_processes(num_processes, arrival_min=0, arrival_max=20,
         burst_time = random.randint(burst_min, burst_max)
         priority = random.randint(priority_min, priority_max)
         
-        processes.append(Process(pid, arrival_time, burst_time, priority))
+        processes.append(process.Process(pid, arrival_time, burst_time, priority))
     
     return processes
 
@@ -68,7 +68,7 @@ def read_processes_from_file(filename="processes.csv"):
                 burst_time = int(row[2])
                 priority = int(row[3])
                 
-                processes.append(Process(pid, arrival_time, burst_time, priority))
+                processes.append(process.Process(pid, arrival_time, burst_time, priority))
         
         print(f"Processes loaded from {filename}")
     except FileNotFoundError:
