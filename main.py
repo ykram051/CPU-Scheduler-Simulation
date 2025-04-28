@@ -2,7 +2,7 @@ import os
 import argparse
 import csv
 from process import Process
-import input_handler
+import InputHandler
 import metrics
 import visualization
 from SchedulingAlgorithms.Scheduler import Scheduler

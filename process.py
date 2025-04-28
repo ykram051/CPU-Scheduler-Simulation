@@ -16,10 +16,11 @@ class Process:
     """
     
     def __init__(self, pid, arrival_time, burst_time, priority=0):
-        self.pid = pid
-        self.arrival_time = arrival_time
-        self.burst_time = burst_time
-        self.priority = priority
+        
+        self.pid = pid# Unique identifier for the process
+        self.arrival_time = arrival_time # Time at which the process arrives in the ready queue
+        self.burst_time = burst_time# Total CPU time required by the process
+        self.priority = priority# Priority of the process (lower value means higher priority)
         
         # These will be calculated during scheduling
         self.remaining_time = burst_time
