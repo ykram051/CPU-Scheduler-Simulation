@@ -1,5 +1,7 @@
 import random
 import process
+import csv
+import json
 
 
 def generate_random_processes(num_processes, arrival_min=0, arrival_max=20, 
@@ -73,6 +75,63 @@ def read_processes_from_file(filename="processes.csv"):
         print(f"Processes loaded from {filename}")
     except FileNotFoundError:
         print(f"File {filename} not found.")
+    except Exception as e:
+        print(f"Error reading file: {e}")
+    
+    return processes
+
+def save_processes_to_json(processes, filename="processes.json"):
+    """
+    Save processes to a JSON file.
+    
+    Args:
+        processes (list): List of Process objects
+        filename (str): Name of the file to save to
+    """
+    process_data = []
+    
+    for p in processes:
+        process_data.append({
+            "pid": p.pid,
+            "arrival_time": p.arrival_time,
+            "burst_time": p.burst_time,
+            "priority": p.priority
+        })
+    
+    with open(filename, 'w') as file:
+        json.dump({"processes": process_data}, file, indent=4)
+    
+    print(f"Processes saved to {filename}")
+
+def read_processes_from_json(filename="processes.json"):
+    """
+    Read processes from a JSON file.
+    
+    Args:
+        filename (str): Name of the file to read from
+        
+    Returns:
+        list: List of Process objects
+    """
+    processes = []
+    
+    try:
+        with open(filename, 'r') as file:
+            data = json.load(file)
+            
+            for process_data in data.get("processes", []):
+                pid = process_data.get("pid", 0)
+                arrival_time = process_data.get("arrival_time", 0)
+                burst_time = process_data.get("burst_time", 1)
+                priority = process_data.get("priority", 1)
+                
+                processes.append(process.Process(pid, arrival_time, burst_time, priority))
+        
+        print(f"Processes loaded from {filename}")
+    except FileNotFoundError:
+        print(f"File {filename} not found.")
+    except json.JSONDecodeError:
+        print(f"Error parsing JSON in {filename}.")
     except Exception as e:
         print(f"Error reading file: {e}")
     

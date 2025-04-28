@@ -13,6 +13,7 @@ class Process:
         turnaround_time (int): Total time taken from arrival to completion
         response_time (int): Time at which the process first gets the CPU
         started (bool): Flag indicating whether the process has started execution
+        start_time (int): Time at which the process first gets the CPU
     """
     
     def __init__(self, pid, arrival_time, burst_time, priority=0):
@@ -28,6 +29,7 @@ class Process:
         self.waiting_time = 0
         self.turnaround_time = 0
         self.response_time = None  # Time when process first gets CPU
+        self.start_time = None  # Time when process first gets CPU (used by schedulers)
         self.started = False
     
     def __str__(self):
@@ -42,4 +44,5 @@ class Process:
         self.waiting_time = 0
         self.turnaround_time = 0
         self.response_time = None
+        self.start_time = None
         self.started = False
