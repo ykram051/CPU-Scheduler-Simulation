@@ -14,6 +14,9 @@ def create_heatmap(results, metrics, title, filename=None):
         metrics: List of metrics to include
         title: Title for the heatmap
         filename: Optional filename to save the plot
+        
+    Returns:
+        The matplotlib figure object
     """
     # Create a DataFrame for the heatmap
     algorithms = list(results.keys())
@@ -39,7 +42,7 @@ def create_heatmap(results, metrics, title, filename=None):
             normalized_df.loc[metric] = (df.loc[metric] - df.loc[metric].min()) / (df.loc[metric].max() - df.loc[metric].min() + 1e-10)
     
     # Create the plot
-    plt.figure(figsize=(10, 8))
+    fig = plt.figure(figsize=(10, 8))
     sns.heatmap(normalized_df, annot=df, fmt=".2f", cmap="YlGnBu", linewidths=0.5)
     plt.title(title)
     plt.tight_layout()
@@ -47,8 +50,9 @@ def create_heatmap(results, metrics, title, filename=None):
     if filename:
         plt.savefig(filename)
         plt.close()
+        return None
     else:
-        plt.show()
+        return fig
 
 def create_radar_chart(results, metrics, title, filename=None):
     """
@@ -59,6 +63,9 @@ def create_radar_chart(results, metrics, title, filename=None):
         metrics: List of metrics to include
         title: Title for the radar chart
         filename: Optional filename to save the plot
+        
+    Returns:
+        The matplotlib figure object
     """
     algorithms = list(results.keys())
     num_metrics = len(metrics)
@@ -105,8 +112,9 @@ def create_radar_chart(results, metrics, title, filename=None):
     if filename:
         plt.savefig(filename)
         plt.close()
+        return None
     else:
-        plt.show()
+        return fig
 
 def create_process_lifecycle_visualization(execution_sequence, processes, title, filename=None):
     """
@@ -117,6 +125,9 @@ def create_process_lifecycle_visualization(execution_sequence, processes, title,
         processes: List of Process objects
         title: Title for the visualization
         filename: Optional filename to save the plot
+        
+    Returns:
+        The matplotlib figure object
     """
     # Create a color map for processes
     num_processes = len(processes)
@@ -255,8 +266,9 @@ def create_process_lifecycle_visualization(execution_sequence, processes, title,
     if filename:
         plt.savefig(filename)
         plt.close()
+        return None
     else:
-        plt.show()
+        return fig
 
 def create_comparative_dashboard(results, processes, title="Algorithm Comparison Dashboard", output_dir=None):
     """
@@ -267,6 +279,9 @@ def create_comparative_dashboard(results, processes, title="Algorithm Comparison
         processes: List of Process objects used in the simulation
         title: Title for the dashboard
         output_dir: Directory to save the dashboard components
+        
+    Returns:
+        Dictionary with figure objects or file paths
     """
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -277,7 +292,7 @@ def create_comparative_dashboard(results, processes, title="Algorithm Comparison
     
     # 1. Generate heatmap for common metrics
     heatmap_file = os.path.join(output_dir, "metrics_heatmap.png") if output_dir else None
-    create_heatmap(results, common_metrics, f"{title} - Common Metrics", heatmap_file)
+    heatmap_fig = create_heatmap(results, common_metrics, f"{title} - Common Metrics", heatmap_file)
     
     # 2. Generate radar chart for all available metrics
     all_metrics = set()
@@ -286,13 +301,16 @@ def create_comparative_dashboard(results, processes, title="Algorithm Comparison
                            m not in ('execution_sequence', 'completed_processes')])
     
     radar_file = os.path.join(output_dir, "metrics_radar.png") if output_dir else None
-    create_radar_chart(results, list(all_metrics), f"{title} - All Metrics", radar_file)
+    radar_fig = create_radar_chart(results, list(all_metrics), f"{title} - All Metrics", radar_file)
     
     # 3. Generate process lifecycle visualizations for each algorithm
+    lifecycle_figs = {}
     for alg, result in results.items():
         if 'execution_sequence' in result:
             lifecycle_file = os.path.join(output_dir, f"{alg.replace(' ', '_')}_lifecycle.png") if output_dir else None
-            create_process_lifecycle_visualization(result['execution_sequence'], processes, alg, lifecycle_file)
+            lifecycle_fig = create_process_lifecycle_visualization(result['execution_sequence'], processes, alg, lifecycle_file)
+            if not output_dir:  # Only store figures if not saving to files
+                lifecycle_figs[alg] = lifecycle_fig
     
     # Generate summarized metrics table
     print("=" * 50)
@@ -320,10 +338,15 @@ def create_comparative_dashboard(results, processes, title="Algorithm Comparison
     
     if output_dir:
         print(f"Dashboard visualizations saved to: {output_dir}")
-    
-    return {
-        "heatmap": heatmap_file,
-        "radar": radar_file,
-        "lifecycles": [os.path.join(output_dir, f"{alg.replace(' ', '_')}_lifecycle.png") 
-                      for alg in algorithms] if output_dir else None
-    }
+        return {
+            "heatmap": heatmap_file,
+            "radar": radar_file,
+            "lifecycles": [os.path.join(output_dir, f"{alg.replace(' ', '_')}_lifecycle.png") 
+                          for alg in algorithms if 'execution_sequence' in results[alg]]
+        }
+    else:
+        return {
+            "heatmap": heatmap_fig,
+            "radar": radar_fig,
+            "lifecycles": lifecycle_figs
+        }

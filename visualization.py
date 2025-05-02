@@ -123,7 +123,7 @@ def create_metrics_comparison_chart(comparison_results, save_file=None):
     Create enhanced bar charts to compare metrics across algorithms.
     
     Args:
-        comparison_results: Dictionary with metric comparisons
+        comparison_results: Dictionary with metrics as keys and algorithm results as values
         save_file: Path to save the chart, if None the chart is displayed
         
     Returns:
@@ -133,14 +133,13 @@ def create_metrics_comparison_chart(comparison_results, save_file=None):
         print("No comparison results to visualize")
         return None
     
-    # Get metrics and algorithms
-    metrics = list(comparison_results.keys())
+    # Get algorithms and metrics
+    algorithms = list(comparison_results.keys())
     
-    # Filter out complex metrics (dictionaries)
-    metrics = [m for m in metrics if isinstance(
-        list(comparison_results[m]['values'].values())[0], 
-        (int, float)
-    )]
+    # Find common metrics across all algorithms
+    metrics = set()
+    for alg, alg_metrics in comparison_results.items():
+        metrics.update([m for m in alg_metrics.keys() if isinstance(alg_metrics[m], (int, float))])
     
     # Group metrics into categories
     time_metrics = [m for m in metrics if 'time' in m]
@@ -165,28 +164,73 @@ def create_metrics_comparison_chart(comparison_results, save_file=None):
     
     # Plot time metrics
     if time_metrics:
-        for metric in time_metrics:
-            values = comparison_results[metric]['values']
-            ax_time.bar(values.keys(), values.values(), label=metric)
+        for i, metric in enumerate(time_metrics):
+            # Extract values for each algorithm
+            algs = []
+            values = []
+            for alg in algorithms:
+                if metric in comparison_results[alg]:
+                    algs.append(alg)
+                    values.append(comparison_results[alg][metric])
+            
+            # Create position offset for grouped bars
+            width = 0.8 / len(time_metrics)
+            positions = np.arange(len(algs)) + (i - len(time_metrics)/2 + 0.5) * width
+            
+            # Plot bars
+            ax_time.bar(positions, values, width=width, label=metric)
+            
         ax_time.set_title("Time Metrics", fontweight='bold')
+        ax_time.set_xticks(np.arange(len(algs)))
+        ax_time.set_xticklabels(algs, rotation=45, ha='right')
         ax_time.legend()
         ax_time.grid(True, axis='y', linestyle='--', alpha=0.7)
     
     # Plot utilization metrics
     if utilization_metrics:
-        for metric in utilization_metrics:
-            values = comparison_results[metric]['values']
-            ax_utilization.bar(values.keys(), values.values(), label=metric)
+        for i, metric in enumerate(utilization_metrics):
+            # Extract values for each algorithm
+            algs = []
+            values = []
+            for alg in algorithms:
+                if metric in comparison_results[alg]:
+                    algs.append(alg)
+                    values.append(comparison_results[alg][metric])
+            
+            # Create position offset for grouped bars
+            width = 0.8 / len(utilization_metrics)
+            positions = np.arange(len(algs)) + (i - len(utilization_metrics)/2 + 0.5) * width
+            
+            # Plot bars
+            ax_utilization.bar(positions, values, width=width, label=metric)
+            
         ax_utilization.set_title("Utilization Metrics", fontweight='bold')
+        ax_utilization.set_xticks(np.arange(len(algs)))
+        ax_utilization.set_xticklabels(algs, rotation=45, ha='right')
         ax_utilization.legend()
         ax_utilization.grid(True, axis='y', linestyle='--', alpha=0.7)
     
     # Plot other metrics
     if other_metrics:
-        for metric in other_metrics:
-            values = comparison_results[metric]['values']
-            ax_other.bar(values.keys(), values.values(), label=metric)
+        for i, metric in enumerate(other_metrics):
+            # Extract values for each algorithm
+            algs = []
+            values = []
+            for alg in algorithms:
+                if metric in comparison_results[alg]:
+                    algs.append(alg)
+                    values.append(comparison_results[alg][metric])
+            
+            # Create position offset for grouped bars
+            width = 0.8 / len(other_metrics)
+            positions = np.arange(len(algs)) + (i - len(other_metrics)/2 + 0.5) * width
+            
+            # Plot bars
+            ax_other.bar(positions, values, width=width, label=metric)
+            
         ax_other.set_title("Other Metrics", fontweight='bold')
+        ax_other.set_xticks(np.arange(len(algs)))
+        ax_other.set_xticklabels(algs, rotation=45, ha='right')
         ax_other.legend()
         ax_other.grid(True, axis='y', linestyle='--', alpha=0.7)
     
@@ -198,7 +242,7 @@ def create_metrics_comparison_chart(comparison_results, save_file=None):
         plt.savefig(save_file, bbox_inches='tight')
         print(f"Metrics comparison chart saved to {save_file}")
     
-    # Return the figure instead of showing it
+    # Return the figure
     return fig
 
 def create_waiting_time_by_priority_chart(priority_data, algorithm_name, save_file=None):
@@ -249,26 +293,4 @@ def create_waiting_time_by_priority_chart(priority_data, algorithm_name, save_fi
     plt.grid(True, axis='y', linestyle='--', alpha=0.7)
     plt.gca().set_axisbelow(True)
     
-    # Set y-axis to start at zero
-    plt.ylim(bottom=0)
-    
-    # Set x-ticks to include all priority levels
-    plt.xticks(priorities)
-    
-    # Add text explanation
-    plt.figtext(
-        0.5, 0.01, 
-        "Note: Lower priority numbers represent higher priority processes",
-        ha='center', fontsize=9, style='italic'
-    )
-    
-    # Adjust layout
-    plt.tight_layout(rect=[0, 0.05, 1, 1])
-    
-    # Save if needed
-    if save_file:
-        plt.savefig(save_file, bbox_inches='tight')
-        print(f"Priority waiting time chart saved to {save_file}")
-    
-    # Return the figure instead of showing it
-    return fig
+    # Set y

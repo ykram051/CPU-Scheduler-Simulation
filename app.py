@@ -449,34 +449,56 @@ if st.session_state.results:
     elif visualization_type == "Full Dashboard":
         st.write("### Full Dashboard")
         
-        # Generate dashboard in a temporary directory and display components
+        # Generate dashboard visualizations directly in memory without saving to files
         with st.spinner("Generating dashboard..."):
-            # Create temporary directory for dashboard
-            dashboard_dir = os.path.join("temp_dashboard", datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
-            os.makedirs(dashboard_dir, exist_ok=True)
-            
-            # Generate dashboard files - les fonctions de visualisation retournent les chemins des fichiers créés
-            dashboard = advanced_visualizations.create_comparative_dashboard(
-                st.session_state.results, st.session_state.processes, "CPU Scheduler Comparison", dashboard_dir
-            )
-            
-            # Display components from saved files
-            if "heatmap" in dashboard and os.path.exists(dashboard["heatmap"]):
-                st.write("#### Common Metrics Heatmap")
-                st.image(dashboard["heatmap"])
-            
-            if "radar" in dashboard and os.path.exists(dashboard["radar"]):
-                st.write("#### All Metrics Radar Chart")
-                st.image(dashboard["radar"])
-            
-            if "lifecycles" in dashboard and dashboard["lifecycles"]:
+            if len(st.session_state.results) > 1:
+                # Create visualizations directly without saving to disk
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.write("#### Metrics Heatmap")
+                    heatmap_fig = advanced_visualizations.create_heatmap(
+                        st.session_state.results, 
+                        ['avg_waiting_time', 'avg_turnaround_time', 'avg_response_time', 'throughput', 'cpu_utilization'], 
+                        "Performance Comparison", 
+                        None  # Don't save to file
+                    )
+                    if heatmap_fig:
+                        st.pyplot(heatmap_fig)
+                
+                with col2:
+                    st.write("#### Metrics Radar Chart")
+                    all_metrics = set()
+                    for alg, metrics_dict in st.session_state.results.items():
+                        all_metrics.update([m for m in metrics_dict.keys() if isinstance(metrics_dict[m], (int, float)) and 
+                                          m not in ('execution_sequence', 'completed_processes')])
+                    radar_fig = advanced_visualizations.create_radar_chart(
+                        st.session_state.results, 
+                        list(all_metrics), 
+                        "Metrics Comparison", 
+                        None  # Don't save to file
+                    )
+                    if radar_fig:
+                        st.pyplot(radar_fig)
+                
+                # Process lifecycle visualizations
                 st.write("#### Process Lifecycle Visualizations")
-                # Display lifecycles in columns
-                cols = st.columns(2)
-                for i, img_path in enumerate(dashboard["lifecycles"]):
-                    if os.path.exists(img_path):
-                        with cols[i % 2]:
-                            st.image(img_path)
+                # Use the tabs system for multiple visualizations
+                lifecycle_tabs = st.tabs([alg_name for alg_name in st.session_state.results.keys()])
+                
+                for i, (alg_name, result) in enumerate(st.session_state.results.items()):
+                    with lifecycle_tabs[i]:
+                        if "execution_sequence" in result:
+                            lifecycle_fig = advanced_visualizations.create_process_lifecycle_visualization(
+                                result["execution_sequence"], 
+                                st.session_state.processes, 
+                                alg_name,
+                                None  # Don't save to file
+                            )
+                            if lifecycle_fig:
+                                st.pyplot(lifecycle_fig)
+            else:
+                st.warning("Please select at least two algorithms to generate a comparative dashboard.")
     
     # Add option to download a PDF report
     st.subheader("Reports")
