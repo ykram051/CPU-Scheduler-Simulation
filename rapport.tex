@@ -51,7 +51,7 @@ Analysis of Algorithms and Implementation Choices Justification}
 \maketitle
 
 \begin{abstract}
-This report presents a detailed analysis of the CPU scheduler simulation project. We examine the different scheduling algorithms implemented, the project structure, and the technical choices that guided our implementation. The algorithms studied include First-Come-First-Served (FCFS), Shortest Job First (SJF), Priority Scheduling, Round Robin (RR), and Priority Round Robin, each with its own characteristics and advantages in different usage contexts. This project also offers an interactive user interface via Streamlit to visualize and compare the performance of the different algorithms.
+This report presents a detailed analysis of the CPU scheduler simulation project. We examine the different scheduling algorithms implemented, the project structure, and the technical choices that guided our implementation. The algorithms studied include First-Come-First-Served (FCFS), Shortest Job First (SJF), Priority Scheduling, Round Robin (RR), Priority Round Robin, and Multilevel Feedback Queue, each with its own characteristics and advantages in different usage contexts. This project also offers an interactive user interface via Streamlit to visualize and compare the performance of the different algorithms, with recently improved visualization capabilities and bug fixes.
 \end{abstract}
 
 \tableofcontents
@@ -69,6 +69,7 @@ This project has several objectives:
     \item Compare their performance using standard metrics
     \item Provide a clear visualization of their operation
     \item Offer an interactive interface for experimentation and learning
+    \item Ensure reliable and robust visualization components
 \end{itemize}
 
 \section{Project Structure}
@@ -80,7 +81,8 @@ The simulation was designed with an object-oriented architecture, which facilita
     \item \textbf{Derived Classes}: Specific implementations of each scheduling algorithm
     \item \textbf{Metrics Module}: Performance calculation (average waiting time, turnaround time, etc.)
     \item \textbf{Visualization Module}: Generation of charts and diagrams
-    \item \textbf{User Interface}: Streamlit application for interaction
+    \item \textbf{Advanced Visualizations Module}: Complex visual analytics like heatmaps and radar charts
+    \item \textbf{User Interface}: Streamlit application for interaction with recently improved visualization handling
 \end{itemize}
 
 \section{Implemented Scheduling Algorithms}
@@ -249,6 +251,41 @@ Priority Round Robin was chosen as an example of an advanced hybrid algorithm th
 
 Our implementation uses a dictionary of queues (deques), one for each priority level, which allows efficient management while maintaining the necessary hierarchical structure.
 
+\subsection{Multilevel Feedback Queue}
+\subsubsection{Description}
+The Multilevel Feedback Queue algorithm maintains multiple queues with different priority levels and time quantums. Processes move between queues based on their behavior and CPU burst patterns.
+
+\subsubsection{Characteristics}
+\begin{itemize}
+    \item \textbf{Preemptive}: Uses different time quantums for different queue levels
+    \item \textbf{Adaptive}: Processes can move between priority queues based on their behavior
+    \item \textbf{Dynamic}: Favors both short interactive processes and CPU-bound longer processes
+    \item \textbf{Complex}: Uses multiple queues with different scheduling parameters
+\end{itemize}
+
+\subsubsection{Advantages and Disadvantages}
+\begin{itemize}
+    \item \textbf{Advantages}:
+    \begin{itemize}
+        \item Adapts to process behavior automatically
+        \item Good balance between response time and throughput
+        \item Favors interactive processes while still handling CPU-bound processes efficiently
+        \item Highly configurable for different workloads
+    \end{itemize}
+    \item \textbf{Disadvantages}:
+    \begin{itemize}
+        \item Highest implementation complexity among the algorithms
+        \item Parameter tuning can be challenging
+        \item Potential for starvation in lower queues if higher queues remain consistently busy
+        \item Higher overhead due to queue management and level transitions
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Implementation Justification}
+We implemented the Multilevel Feedback Queue algorithm to demonstrate a sophisticated scheduling approach used in many modern operating systems, including variants in Windows and Unix systems. This algorithm provides a good balance between responsiveness for interactive tasks and fairness for all processes.
+
+Our implementation uses multiple queues with configurable time quantums for each level, allowing processes to be dynamically promoted or demoted based on their CPU usage patterns.
+
 \section{Evaluation Metrics}
 To objectively compare the different algorithms, we implemented several standard metrics:
 
@@ -304,8 +341,20 @@ An important aspect of our project is the visualization of the behaviors of diff
 \subsection{Gantt Chart}
 Shows the order and duration of execution of each process on the time scale. This visualization is particularly useful for understanding how algorithms handle processes over time.
 
+Our recent improvements to the Gantt chart visualization include:
+\begin{itemize}
+    \item Fixed issues with empty figure rendering by ensuring that visualization functions properly create and return their figures
+    \item Improved robustness by adding validation checks before displaying graphics
+    \item Enhanced color coding for better differentiation between processes
+\end{itemize}
+
 \subsection{Process Timeline}
-Displays the complete lifecycle of each process, clearly showing waiting and execution periods.
+Displays the complete lifecycle of each process, clearly showing waiting and execution periods. The visualizations now include:
+\begin{itemize}
+    \item Clearer distinction between waiting, ready, and execution states
+    \item Improved handling of process state transitions
+    \item More reliable rendering with proper figure management
+\end{itemize}
 
 \subsection{Comparative Graphs}
 Allow direct comparison of the performance of different algorithms according to various metrics:
@@ -314,6 +363,59 @@ Allow direct comparison of the performance of different algorithms according to 
     \item Average waiting time
     \item Average response time
     \item CPU utilization
+\end{itemize}
+
+Recent improvements include:
+\begin{itemize}
+    \item Fixed issues with figure rendering in the Comparisons tab
+    \item Added validation to check if figures exist before attempting to display them
+    \item Improved handling of visualization selection between Standard and Advanced modes
+\end{itemize}
+
+\subsection{Advanced Visualizations}
+Our project now includes more sophisticated visualization techniques:
+
+\subsubsection{Heatmap}
+A color-coded matrix representation that shows how various algorithms perform across different metrics. These heatmaps allow for quick identification of strengths and weaknesses of each algorithm.
+
+\subsubsection{Radar Charts}
+Multi-variable charts that display performance across multiple metrics simultaneously, allowing for a comprehensive overview of each algorithm's characteristics.
+
+\subsubsection{Full Dashboard}
+An integrated visualization panel that combines multiple charts and graphs into a unified interface. Recent improvements include:
+\begin{itemize}
+    \item Fixed issues with rendering of dashboard components
+    \item Added validation to ensure images exist before displaying them
+    \item Implemented proper file path handling for temporary visualization files
+    \item Improved layout and organization of dashboard elements
+\end{itemize}
+
+\section{Recent Technical Improvements}
+\subsection{Visualization System Refactoring}
+We recently completed a significant refactoring of the visualization system to address several technical issues:
+
+\subsubsection{Figure Management}
+Previously, our code was creating empty figures before calling visualization functions, which were then creating their own figures internally. This led to conflicts where the empty figure would override the content-filled figure. The solution was to:
+\begin{itemize}
+    \item Remove redundant figure creation code
+    \item Ensure visualization functions properly create and return their figures
+    \item Add validation checks before displaying graphics
+\end{itemize}
+
+\subsubsection{File Path Handling}
+The application now properly manages file paths for saved visualizations:
+\begin{itemize}
+    \item Using consistent timestamp-based directories for organization
+    \item Properly checking file existence before attempting to display images
+    \item Cleaning up temporary files to prevent storage bloat
+\end{itemize}
+
+\subsubsection{Error Handling}
+We've improved the robustness of the application by:
+\begin{itemize}
+    \item Adding validation checks before displaying visualizations
+    \item Implementing graceful fallbacks when visualizations fail
+    \item Providing more informative error messages to users
 \end{itemize}
 
 \section{Conclusion}
@@ -326,19 +428,35 @@ Our simulation demonstrates that each scheduling algorithm has its own strengths
     \item \textbf{Priority Scheduling} allows favoring important processes but also risks creating starvation
     \item \textbf{Round Robin} offers good responsiveness and fairness but with overhead related to context switches
     \item \textbf{Priority Round Robin} combines advantages and disadvantages of priority and Round Robin approaches
+    \item \textbf{Multilevel Feedback Queue} provides adaptive scheduling but with increased complexity
 \end{itemize}
 
+With our recent visualization improvements, users can now more reliably analyze and compare these algorithms through interactive charts and graphs.
+
 \subsection{Educational Implications}
-This simulation constitutes a valuable educational tool for understanding the fundamental concepts of CPU scheduling and the inherent trade-offs of each approach. The interactive interface facilitates experimentation and learning.
+This simulation constitutes a valuable educational tool for understanding the fundamental concepts of CPU scheduling and the inherent trade-offs of each approach. The interactive interface, with its newly improved visualization capabilities, facilitates experimentation and learning.
+
+\subsection{Technical Challenges Overcome}
+During this project, we encountered and resolved several technical challenges:
+\begin{itemize}
+    \item Visualization rendering issues in the Streamlit interface
+    \item Figure management conflicts between different visualization functions
+    \item File path handling for temporary visualization files
+    \item Performance optimization for handling large process sets
+\end{itemize}
+
+These challenges provided valuable learning experiences in software engineering practices, particularly in the areas of debugging, code refactoring, and application architecture.
 
 \subsection{Future Improvements}
 Several improvement axes can be considered to extend this project:
 \begin{itemize}
-    \item Implementation of additional algorithms (Multilevel Feedback Queue, Earliest Deadline First, etc.)
+    \item Implementation of additional algorithms (Earliest Deadline First, Completely Fair Scheduler, etc.)
     \item Simulation of multi-core and multi-processor systems
     \item More detailed modeling of input/output operations
     \item Integration of aging mechanisms to prevent starvation
     \item Development of predefined test scenarios representing different workloads
+    \item Further enhancements to the visualization system, including interactive charts
+    \item Addition of real-time performance metrics during simulation
 \end{itemize}
 
 \bibliographystyle{plain}
@@ -358,6 +476,16 @@ Several improvement axes can be considered to extend this project:
   Stallings, W.,
   \textit{Operating Systems: Internals and Design Principles},
   Pearson, 9th Edition, 2018.
+
+\bibitem{streamlit}
+  Streamlit Documentation,
+  \url{https://docs.streamlit.io/},
+  Accessed May 2025.
+
+\bibitem{matplotlib}
+  Hunter, J. D.,
+  \textit{Matplotlib: A 2D Graphics Environment},
+  Computing in Science \& Engineering, 9(3), 90-95, 2007.
 
 \end{thebibliography}
 
