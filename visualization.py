@@ -13,21 +13,22 @@ def create_gantt_chart(execution_sequence, algorithm_name, save_file=None):
         execution_sequence: List of execution segments with pid, start, and end times
         algorithm_name: Name of the scheduling algorithm
         save_file: Path to save the chart, if None the chart is displayed
+        
+    Returns:
+        The matplotlib figure object
     """
     if not execution_sequence:
         print("No execution sequence to visualize")
-        return
-    
-    # Get unique process IDs and sort them
-    process_ids = sorted(set(item['pid'] for item in execution_sequence))
+        return None
     
     # Create figure and axis with improved size and resolution
-    plt.figure(figsize=(14, 7), dpi=100)
+    fig = plt.figure(figsize=(14, 7), dpi=100)
     
     # Define a vibrant color palette
-    colors = plt.cm.viridis(np.linspace(0, 0.9, len(process_ids)))
+    colors = plt.cm.viridis(np.linspace(0, 0.9, len(set(item['pid'] for item in execution_sequence))))
     
     # Map process IDs to colors
+    process_ids = sorted(set(item['pid'] for item in execution_sequence))
     color_map = {pid: colors[i] for i, pid in enumerate(process_ids)}
     
     # Create subplots: Gantt chart and legend
@@ -109,14 +110,13 @@ def create_gantt_chart(execution_sequence, algorithm_name, save_file=None):
     # Adjust layout
     plt.tight_layout()
     
-    # Save or show
+    # Save if needed
     if save_file:
         plt.savefig(save_file, bbox_inches='tight')
         print(f"Gantt chart saved to {save_file}")
-    else:
-        plt.show()
     
-    plt.close()
+    # Return the figure instead of showing it
+    return fig
 
 def create_metrics_comparison_chart(comparison_results, save_file=None):
     """
@@ -125,10 +125,13 @@ def create_metrics_comparison_chart(comparison_results, save_file=None):
     Args:
         comparison_results: Dictionary with metric comparisons
         save_file: Path to save the chart, if None the chart is displayed
+        
+    Returns:
+        The matplotlib figure object
     """
     if not comparison_results:
         print("No comparison results to visualize")
-        return
+        return None
     
     # Get metrics and algorithms
     metrics = list(comparison_results.keys())
@@ -156,274 +159,47 @@ def create_metrics_comparison_chart(comparison_results, save_file=None):
     ])
     
     # Create subplots for each category
-    for i, (title, category_metrics) in enumerate([
-        ("Time-based Metrics", time_metrics),
-        ("Utilization Metrics", utilization_metrics),
-        ("Other Performance Metrics", other_metrics)
-    ]):
-        if not category_metrics:
-            continue
-            
-        ax = plt.subplot(gs[i])
-        
-        # Position multiple metrics in this category
-        positions = np.arange(0, len(category_metrics) * 4, 4)
-        width = 0.7
-        
-        algorithms = list(comparison_results[category_metrics[0]]['values'].keys())
-        colors = plt.cm.tab10(np.linspace(0, 1, len(algorithms)))
-        
-        # For each algorithm, plot its value for each metric
-        for j, alg in enumerate(algorithms):
-            values = [comparison_results[metric]['values'].get(alg, 0) for metric in category_metrics]
-            bars = ax.bar(positions + j*width, values, width=width, 
-                          color=colors[j], label=alg, alpha=0.8)
-            
-            # Add value labels on bars
-            for bar in bars:
-                height = bar.get_height()
-                ax.text(
-                    bar.get_x() + bar.get_width()/2.,
-                    height + 0.05 * max(values),
-                    f'{height:.2f}',
-                    ha='center', 
-                    va='bottom',
-                    fontsize=8
-                )
-        
-        # Highlight best algorithm for each metric
-        for k, metric in enumerate(category_metrics):
-            best_alg = comparison_results[metric]['best_algorithm']
-            best_idx = algorithms.index(best_alg)
-            
-            # Draw a star on the best algorithm bar
-            best_value = comparison_results[metric]['values'][best_alg]
-            ax.plot(positions[k] + best_idx*width + width/2, best_value + 0.15 * max(values), 
-                    marker='*', markersize=12, color='gold', markeredgecolor='black')
-        
-        # Set x ticks at the center of each metric group
-        ax.set_xticks(positions + width * (len(algorithms) - 1) / 2)
-        ax.set_xticklabels([metric.replace('_', ' ').title() for metric in category_metrics])
-        
-        # Set title and grid
-        ax.set_title(title, fontweight='bold', fontsize=14)
-        ax.grid(True, axis='y', linestyle='--', alpha=0.7)
-        ax.set_axisbelow(True)
+    ax_time = plt.subplot(gs[0]) if time_metrics else None
+    ax_utilization = plt.subplot(gs[1]) if utilization_metrics else None
+    ax_other = plt.subplot(gs[2]) if other_metrics else None
     
-    # Add legend at the bottom
-    plt.figlegend(
-        loc='lower center', 
-        bbox_to_anchor=(0.5, 0.02),
-        ncol=min(5, len(algorithms))
-    )
+    # Plot time metrics
+    if time_metrics:
+        for metric in time_metrics:
+            values = comparison_results[metric]['values']
+            ax_time.bar(values.keys(), values.values(), label=metric)
+        ax_time.set_title("Time Metrics", fontweight='bold')
+        ax_time.legend()
+        ax_time.grid(True, axis='y', linestyle='--', alpha=0.7)
     
-    # Add overall title
-    plt.suptitle('CPU Scheduling Algorithm Performance Comparison', 
-                fontsize=16, fontweight='bold', y=0.98)
+    # Plot utilization metrics
+    if utilization_metrics:
+        for metric in utilization_metrics:
+            values = comparison_results[metric]['values']
+            ax_utilization.bar(values.keys(), values.values(), label=metric)
+        ax_utilization.set_title("Utilization Metrics", fontweight='bold')
+        ax_utilization.legend()
+        ax_utilization.grid(True, axis='y', linestyle='--', alpha=0.7)
+    
+    # Plot other metrics
+    if other_metrics:
+        for metric in other_metrics:
+            values = comparison_results[metric]['values']
+            ax_other.bar(values.keys(), values.values(), label=metric)
+        ax_other.set_title("Other Metrics", fontweight='bold')
+        ax_other.legend()
+        ax_other.grid(True, axis='y', linestyle='--', alpha=0.7)
     
     # Adjust layout
-    plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+    plt.tight_layout()
     
-    # Save or show
+    # Save if needed
     if save_file:
         plt.savefig(save_file, bbox_inches='tight')
-        print(f"Comparison chart saved to {save_file}")
-    else:
-        plt.show()
+        print(f"Metrics comparison chart saved to {save_file}")
     
-    plt.close()
-
-def create_process_timeline(processes, algorithm_name, save_file=None):
-    """
-    Create a timeline visualization showing the lifecycle of each process.
-    
-    Args:
-        processes: List of completed processes
-        algorithm_name: Name of the scheduling algorithm
-        save_file: Path to save the chart, if None the chart is displayed
-    """
-    if not processes:
-        print("No processes to visualize")
-        return
-    
-    # Sort processes by arrival time
-    processes = sorted(processes, key=lambda p: p.arrival_time)
-    
-    # Create figure
-    plt.figure(figsize=(14, 8), dpi=100)
-    
-    # Define colors for different states
-    colors = {
-        'waiting': 'lightgray',
-        'running': 'dodgerblue',
-        'complete': 'forestgreen'
-    }
-    
-    # Get the maximum completion time
-    max_time = max(p.completion_time for p in processes)
-    
-    # Create a subplot for each process
-    for i, process in enumerate(processes):
-        plt.subplot(len(processes), 1, i+1)
-        
-        # Calculate waiting time periods
-        total_execution_time = 0
-        waiting_time = process.waiting_time
-        
-        # Plot waiting time (from arrival to start)
-        plt.barh(
-            0, 
-            process.start_time - process.arrival_time, 
-            left=process.arrival_time,
-            color=colors['waiting'],
-            alpha=0.7,
-            label='Waiting' if i == 0 else ""
-        )
-        
-        # Plot execution time
-        plt.barh(
-            0,
-            process.burst_time,
-            left=process.start_time,
-            color=colors['running'],
-            alpha=0.7,
-            label='Running' if i == 0 else ""
-        )
-        
-        # Add markers for key events
-        plt.plot(process.arrival_time, 0, 'v', color='red', markersize=7, label='Arrival' if i == 0 else "")
-        plt.plot(process.start_time, 0, '>', color='blue', markersize=7, label='Start' if i == 0 else "")
-        plt.plot(process.completion_time, 0, 'D', color='green', markersize=7, label='Completion' if i == 0 else "")
-        
-        # Add text annotations
-        plt.text(process.arrival_time, 0.15, f"A:{process.arrival_time}", ha='center', va='bottom', fontsize=8)
-        plt.text(process.completion_time, 0.15, f"C:{process.completion_time}", ha='center', va='bottom', fontsize=8)
-        
-        # Add process info
-        plt.text(
-            0, 
-            0, 
-            f"P{process.pid} (Burst:{process.burst_time}, Priority:{process.priority})",
-            ha='right', 
-            va='center',
-            fontweight='bold',
-            fontsize=9
-        )
-        
-        # Add turnaround and waiting time
-        plt.text(
-            max_time + 1, 
-            0, 
-            f"TAT:{process.turnaround_time}, WT:{process.waiting_time}",
-            ha='left', 
-            va='center',
-            fontsize=9
-        )
-        
-        # Remove y ticks and labels
-        plt.yticks([])
-        
-        # Set x axis limits
-        plt.xlim(-3, max_time + 5)
-        
-        # Only show x axis labels for the bottom subplot
-        if i == len(processes) - 1:
-            plt.xlabel("Time Units", fontweight='bold')
-        else:
-            plt.tick_params(labelbottom=False)
-    
-    # Add legend on the top
-    plt.legend(
-        loc='upper center', 
-        bbox_to_anchor=(0.5, len(processes) + 0.3),
-        ncol=5,
-        frameon=True
-    )
-    
-    # Add title
-    plt.suptitle(
-        f'Process Timeline - {algorithm_name}',
-        fontsize=14,
-        fontweight='bold',
-        y=0.98
-    )
-    
-    # Adjust layout
-    plt.tight_layout(rect=[0, 0, 1, 0.96])
-    
-    # Save or show
-    if save_file:
-        plt.savefig(save_file, bbox_inches='tight')
-        print(f"Process timeline saved to {save_file}")
-    else:
-        plt.show()
-    
-    plt.close()
-
-def create_comprehensive_report(results, save_dir=None):
-    """
-    Create a comprehensive visualization report for all algorithms.
-    
-    Args:
-        results: Dictionary containing results for each algorithm
-        save_dir: Directory to save visualizations, if None they are displayed
-    """
-    if not results:
-        print("No results to visualize")
-        return
-        
-    # Ensure directory exists
-    if save_dir and not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    
-    # Create individual Gantt charts for each algorithm
-    for algorithm_name, result in results.items():
-        if 'execution_sequence' in result:
-            gantt_file = None
-            if save_dir:
-                gantt_file = os.path.join(save_dir, f"{algorithm_name.replace(' ', '_').lower()}_gantt.png")
-            
-            create_gantt_chart(
-                result['execution_sequence'],
-                algorithm_name,
-                save_file=gantt_file
-            )
-        
-        # Create process timeline if completed_processes are available
-        if 'completed_processes' in result:
-            timeline_file = None
-            if save_dir:
-                timeline_file = os.path.join(save_dir, f"{algorithm_name.replace(' ', '_').lower()}_timeline.png")
-            
-            create_process_timeline(
-                result['completed_processes'],
-                algorithm_name,
-                save_file=timeline_file
-            )
-    
-    # Create comparison charts
-    if len(results) > 1:
-        # Prepare comparison data (omitting non-metric keys)
-        comparison_data = {}
-        for alg, result in results.items():
-            comparison_data[alg] = {
-                k: v for k, v in result.items() 
-                if k not in ['execution_sequence', 'completed_processes'] and not isinstance(v, dict)
-            }
-        
-        # Generate comparison results
-        from metrics import compare_algorithms
-        comparison = compare_algorithms(comparison_data)
-        
-        # Create comparison chart
-        comparison_file = None
-        if save_dir:
-            comparison_file = os.path.join(save_dir, "algorithm_comparison.png")
-        
-        create_metrics_comparison_chart(
-            comparison,
-            save_file=comparison_file
-        )
+    # Return the figure instead of showing it
+    return fig
 
 def create_waiting_time_by_priority_chart(priority_data, algorithm_name, save_file=None):
     """
@@ -433,13 +209,16 @@ def create_waiting_time_by_priority_chart(priority_data, algorithm_name, save_fi
         priority_data: Dictionary mapping priority levels to waiting times
         algorithm_name: Name of the scheduling algorithm
         save_file: Path to save the chart, if None the chart is displayed
+        
+    Returns:
+        The matplotlib figure object
     """
     if not priority_data:
         print("No priority data to visualize")
-        return
+        return None
     
     # Create figure
-    plt.figure(figsize=(10, 6), dpi=100)
+    fig = plt.figure(figsize=(10, 6), dpi=100)
     
     # Sort priorities (lower number = higher priority)
     priorities = sorted(priority_data.keys())
@@ -486,11 +265,10 @@ def create_waiting_time_by_priority_chart(priority_data, algorithm_name, save_fi
     # Adjust layout
     plt.tight_layout(rect=[0, 0.05, 1, 1])
     
-    # Save or show
+    # Save if needed
     if save_file:
         plt.savefig(save_file, bbox_inches='tight')
         print(f"Priority waiting time chart saved to {save_file}")
-    else:
-        plt.show()
     
-    plt.close()
+    # Return the figure instead of showing it
+    return fig

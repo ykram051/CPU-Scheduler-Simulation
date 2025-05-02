@@ -1,0 +1,51 @@
+Test Summary for random_processes
+==================================================
+
+FCFS Results:
+------------------------------
+  avg_turnaround_time: 38.6500
+  avg_waiting_time: 32.2000
+  avg_response_time: 32.2000
+  throughput: 0.1550
+  cpu_utilization: 100.0000
+
+SJF Results:
+------------------------------
+  avg_turnaround_time: 0.0000
+  avg_waiting_time: 0.0000
+  avg_response_time: 32.2000
+  throughput: 0.4000
+  cpu_utilization: 258.0000
+
+Priority Results:
+------------------------------
+  avg_turnaround_time: 0.0000
+  avg_waiting_time: 0.0000
+  avg_response_time: 32.2000
+  throughput: 0.4000
+  cpu_utilization: 258.0000
+  priority_preference_ratio: 1.0000
+
+Round Robin Results:
+------------------------------
+  avg_turnaround_time: 0.0000
+  avg_waiting_time: 0.0000
+  avg_response_time: 32.2000
+  throughput: 0.4000
+  cpu_utilization: 258.0000
+  context_switches: 0.0000
+  fairness: 1.0000
+  quantum_utilization: 0.0000
+
+Priority RR Results:
+------------------------------
+  avg_turnaround_time: 0.0000
+  avg_waiting_time: 0.0000
+  avg_response_time: 32.2000
+  throughput: 0.4000
+  cpu_utilization: 258.0000
+  context_switches: 0.0000
+  fairness: 1.0000
+  quantum_utilization: 0.0000
+  priority_preference_ratio: 1.0000
+

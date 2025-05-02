@@ -19,14 +19,16 @@ def calculate_basic_metrics(completed_processes):
     # Calculate waiting time (turnaround - burst)
     total_waiting_time = 0
     for process in completed_processes:
-        process.waiting_time = process.turnaround_time - process.burst_time
+        # Ensure waiting time is not negative
+        process.waiting_time = max(0, process.turnaround_time - process.burst_time)
         total_waiting_time += process.waiting_time
     avg_waiting_time = total_waiting_time / len(completed_processes)
     
     # Calculate response time (first CPU - arrival)
     total_response_time = 0
     for process in completed_processes:
-        process.response_time = process.start_time - process.arrival_time
+        # Ensure response time is not negative (for processes that might have negative arrival times)
+        process.response_time = max(0, process.start_time - process.arrival_time)
         total_response_time += process.response_time
     avg_response_time = total_response_time / len(completed_processes)
     
