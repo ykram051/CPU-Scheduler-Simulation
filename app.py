@@ -527,7 +527,7 @@ This application allows simulating and analyzing different CPU scheduling algori
 - **Priority Round Robin**
 - **Multilevel Feedback Queue (MFQ)**
 
-Developed as part of an academic project in computational theory.
+Developed as part of an academic project in  Operating Systemsx.
 """)
 
 if st.session_state.show_advanced:

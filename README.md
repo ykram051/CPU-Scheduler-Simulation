@@ -1,38 +1,6 @@
 # CPU Scheduler Simulation
 
-A comprehensive simulation and visualization tool for CPU scheduling algorithms used in operating systems.
-
-## Overview
-
-This application simulates different CPU scheduling algorithms and provides visual comparisons of their performance. It supports multiple scheduling algorithms, process generation methods, and comprehensive performance metrics to help understand the behavior and efficiency of each algorithm.
-
-## Features
-
-- **Multiple Scheduling Algorithms**:
-  - First-Come, First-Served (FCFS)
-  - Shortest Job First (SJF)
-  - Priority Scheduling
-  - Round Robin (RR)
-  - Priority Round Robin
-
-- **Process Management**:
-  - Random process generation with customizable parameters
-  - Manual process creation
-  - Import/export processes from/to JSON files
-
-- **Visualization**:
-  - Gantt charts for CPU execution timeline
-  - Process timelines showing states over time
-  - Performance metrics comparisons
-  - Algorithm comparison across multiple metrics
-
-- **Metrics**:
-  - Average Turnaround Time
-  - Average Waiting Time  
-  - Average Response Time
-  - CPU Utilization
-  - Throughput
-  - Algorithm-specific metrics (context switches, fairness, etc.)
+A simulation tool for CPU scheduling algorithms used in operating systems.
 
 ## Installation
 
@@ -47,75 +15,95 @@ cd CPU-Scheduler-Simulation
 pip install -r requirements.txt
 ```
 
-## Usage
+## Running the Program
 
-### Command Line Interface
+### Web Interface (Recommended)
 
-Run the simulation from the command line:
-```bash
-python main.py
-```
-
-### Interactive Web Interface
-
-For a more interactive experience with visualizations:
+For an interactive experience with visualizations:
 ```bash
 python -m streamlit run app.py
 ```
 
 This will open a web interface in your browser where you can:
-1. Generate or import processes
-2. Select a scheduling algorithm
+1. Generate or define processes
+2. Select scheduling algorithms
 3. Run simulations and visualize results
 4. Compare algorithm performance
 
-## Process Format
+#### Using Pre-defined Process Files
 
-When importing processes from a JSON file, use the following format:
+The application supports importing process data from JSON files:
+
+1. You can use the provided `temp_processes.json` file as a starting point
+2. Upload it through the "Load from file" option in the web interface
+3. Create your own process files following the same format
+
+Example process file format:
 ```json
-{
-    "processes": [
-        {
-            "pid": 1,
-            "arrival_time": 0,
-            "burst_time": 5,
-            "priority": 2
-        },
-        {
-            "pid": 2,
-            "arrival_time": 1,
-            "burst_time": 3,
-            "priority": 1
-        }
-    ]
-}
+[
+  {"pid": 1, "arrival_time": 0, "burst_time": 5, "priority": 3},
+  {"pid": 2, "arrival_time": 2, "burst_time": 3, "priority": 1},
+  {"pid": 3, "arrival_time": 4, "burst_time": 6, "priority": 2}
+]
 ```
+
+### Command Line
+
+To run the simulation from the command line:
+```bash
+python main.py [options]
+```
+
+Example commands:
+```bash
+# Run all algorithms with default processes
+python main.py --all
+
+# Generate 10 random processes and run FCFS and SJF
+python main.py --random 10 --fcfs --sjf
+
+# Load processes from a file and save visualizations
+python main.py --file my_processes.json --all --output results
+```
+
+## Implementation Details
+
+This application implements six CPU scheduling algorithms:
+- First-Come, First-Served (FCFS)
+- Shortest Job First (SJF)
+- Priority Scheduling
+- Round Robin (RR)
+- Priority Round Robin
+- Multilevel Feedback Queue (MFQ)
+
+Each algorithm calculates key performance metrics including average waiting time, turnaround time, response time, CPU utilization, and algorithm-specific metrics.
+
+The visualization components generate Gantt charts, process lifecycle visualizations, and comparative metrics to help understand algorithm behavior.
 
 ## Project Structure
 
-- `app.py` - Streamlit web application for interactive visualization
-- `main.py` - Command-line interface for running simulations
-- `metrics.py` - Performance metrics calculation functions
+- `app.py` - Streamlit web application
+- `main.py` - Command-line interface
+- `SchedulingAlgorithms/` - Individual algorithm implementations
+- `visualization.py` & `advanced_visualizations.py` - Visualization functions
 - `process.py` - Process class definition
-- `InputHandler.py` - Process generation and I/O utilities
-- `visualization.py` - Visualization functions for command-line outputs
-- `SchedulingAlgorithms/` - Directory containing all scheduling algorithm implementations:
-  - `Scheduler.py` - Base class for all schedulers
-  - `FirstComeFirstServe.py` - FCFS algorithm implementation
-  - `ShortestJobFirst.py` - SJF algorithm implementation
-  - `PriorityScheduling.py` - Priority scheduling implementation
-  - `RoundRobin.py` - Round Robin scheduling implementation
-  - `PriorityRoundRobin.py` - Priority-based Round Robin implementation
+- `metrics.py` - Performance metrics calculation
 
-## Design Decisions
+## Testing
 
-1. **Object-Oriented Approach**: Each scheduling algorithm inherits from a base `Scheduler` class, allowing for consistent interfaces and clear organization.
+The project includes a test suite to verify the correctness of the scheduling algorithms:
 
-2. **Separation of Concerns**: The project separates process management, algorithm implementation, metrics calculation, and visualization into distinct modules.
+```bash
+# Run the test suite
+python test_scheduler_simulation.py
+```
 
-3. **Algorithm Comparability**: All scheduling algorithms return standardized metrics, enabling direct comparison between different approaches.
+The test scheduler validates:
+- Algorithm implementations
+- Metrics calculations
+- Edge case handling
+- Process state transitions
 
-4. **Interactive Visualization**: The Streamlit web interface provides intuitive visualization options to help understand algorithm behavior.
+This ensures that all scheduling algorithms produce correct results and meet the expected performance characteristics.
 
-5. **Extensibility**: New scheduling algorithms can be easily added by creating a new class that inherits from the base `Scheduler` class.
 
